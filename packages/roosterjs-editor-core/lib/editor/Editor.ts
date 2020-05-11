@@ -47,6 +47,7 @@ import {
     setHtmlWithSelectionPath,
     wrap,
     isPositionAtBeginningOf,
+    VList,
 } from 'roosterjs-editor-dom';
 
 /**
@@ -74,7 +75,7 @@ export default class Editor {
         this.core = createEditorCore(contentDiv, options);
 
         // 3. Initialize plugins
-        this.core.plugins.forEach(plugin => plugin.initialize(this));
+        this.core.plugins.forEach((plugin) => plugin.initialize(this));
 
         // 4. Ensure initial content and its format
         this.setContent(
@@ -87,7 +88,9 @@ export default class Editor {
 
         // 6. Add additional content edit features to the editor if specified
         if (options.additionalEditFeatures) {
-            options.additionalEditFeatures.forEach(feature => this.addContentEditFeature(feature));
+            options.additionalEditFeatures.forEach((feature) =>
+                this.addContentEditFeature(feature)
+            );
         }
 
         // 7. Make the container editable and set its selection styles
@@ -116,8 +119,8 @@ export default class Editor {
     public dispose(): void {
         this.triggerPluginEvent(PluginEventType.BeforeDispose, {}, true /*broadcast*/);
 
-        this.core.plugins.forEach(plugin => plugin.dispose());
-        this.eventDisposers.forEach(disposer => disposer());
+        this.core.plugins.forEach((plugin) => plugin.dispose());
+        this.eventDisposers.forEach((disposer) => disposer());
         this.eventDisposers = null;
 
         for (let key of Object.keys(this.core.customData)) {
@@ -431,7 +434,7 @@ export default class Editor {
             }
 
             let fragment = this.core.document.createDocumentFragment();
-            allNodes.forEach(node => fragment.appendChild(node));
+            allNodes.forEach((node) => fragment.appendChild(node));
 
             this.insertNode(fragment, option);
         }
@@ -629,6 +632,27 @@ export default class Editor {
         return isPositionAtBeginningOf(position, this.core.contentDiv);
     }
 
+    public getVList(node?: Node): VList {
+        function isListElement(node: Node): node is HTMLOListElement | HTMLUListElement {
+            const tag = getTagOfNode(node);
+            return tag == 'OL' || tag == 'UL';
+        }
+
+        let list = this.getElementAtCursor('OL,UL', node) as HTMLOListElement | HTMLUListElement;
+        let parent: Node;
+
+        while (
+            list &&
+            (parent = list.parentNode) &&
+            parent != this.core.contentDiv &&
+            isListElement(parent)
+        ) {
+            list = parent;
+        }
+
+        return list ? new VList(list) : null;
+    }
+
     //#endregion
 
     //#region EVENT API
@@ -663,7 +687,7 @@ export default class Editor {
         if (nameOrMap instanceof Object) {
             let handlers = Object.keys(nameOrMap)
                 .map(
-                    eventName =>
+                    (eventName) =>
                         nameOrMap[eventName] &&
                         this.core.api.attachDomEvent(
                             this.core,
@@ -672,8 +696,8 @@ export default class Editor {
                             nameOrMap[eventName]
                         )
                 )
-                .filter(x => x);
-            return () => handlers.forEach(handler => handler());
+                .filter((x) => x);
+            return () => handlers.forEach((handler) => handler());
         } else {
             return this.core.api.attachDomEvent(
                 this.core,

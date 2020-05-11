@@ -1,3 +1,4 @@
+import getTagOfNode from './getTagOfNode';
 import { getComputedStyle } from './getComputedStyles';
 import { NodeType } from 'roosterjs-editor-types';
 
@@ -14,7 +15,10 @@ export default function shouldSkipNode(node: Node): boolean {
     if (node.nodeType == NodeType.Text) {
         return !node.nodeValue || node.textContent == '' || CRLF.test(node.nodeValue);
     } else if (node.nodeType == NodeType.Element) {
-        return getComputedStyle(node, 'display') == 'none';
+        return (
+            (!node.firstChild && getTagOfNode(node) == 'DIV') || // Skip empty DIv since it is not visible
+            getComputedStyle(node, 'display') == 'none'
+        );
     } else {
         return true;
     }
