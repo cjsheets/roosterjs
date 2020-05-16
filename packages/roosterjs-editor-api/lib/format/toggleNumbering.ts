@@ -1,6 +1,6 @@
-import processList from '../utils/processList';
-import { ChangeSource, DocumentCommand } from 'roosterjs-editor-types';
+import toggleListCore from '../utils/toggleListCore';
 import { Editor } from 'roosterjs-editor-core';
+import { ListType } from 'roosterjs-editor-types';
 
 /**
  * Toggle numbering at selection
@@ -11,9 +11,5 @@ import { Editor } from 'roosterjs-editor-core';
  * @param editor The editor instance
  */
 export default function toggleNumbering(editor: Editor) {
-    editor.focus();
-    editor.addUndoSnapshot(
-        () => processList(editor, DocumentCommand.InsertOrderedList),
-        ChangeSource.Format
-    );
+    toggleListCore(editor, ListType.Ordered);
 }

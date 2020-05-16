@@ -74,7 +74,7 @@ export default class Editor {
         this.core = createEditorCore(contentDiv, options);
 
         // 3. Initialize plugins
-        this.core.plugins.forEach(plugin => plugin.initialize(this));
+        this.core.plugins.forEach((plugin) => plugin.initialize(this));
 
         // 4. Ensure initial content and its format
         this.setContent(
@@ -87,7 +87,9 @@ export default class Editor {
 
         // 6. Add additional content edit features to the editor if specified
         if (options.additionalEditFeatures) {
-            options.additionalEditFeatures.forEach(feature => this.addContentEditFeature(feature));
+            options.additionalEditFeatures.forEach((feature) =>
+                this.addContentEditFeature(feature)
+            );
         }
 
         // 7. Make the container editable and set its selection styles
@@ -116,8 +118,8 @@ export default class Editor {
     public dispose(): void {
         this.triggerPluginEvent(PluginEventType.BeforeDispose, {}, true /*broadcast*/);
 
-        this.core.plugins.forEach(plugin => plugin.dispose());
-        this.eventDisposers.forEach(disposer => disposer());
+        this.core.plugins.forEach((plugin) => plugin.dispose());
+        this.eventDisposers.forEach((disposer) => disposer());
         this.eventDisposers = null;
 
         for (let key of Object.keys(this.core.customData)) {
@@ -310,6 +312,18 @@ export default class Editor {
     /**
      * Collapse nodes within the given start and end nodes to their common ascenstor node,
      * split parent nodes if necessary
+     * @param nodes Array of nodes to collect
+     * @param canSplitParent True to allow split parent node there are nodes before start or after end under the same parent
+     * and the returned nodes will be all nodes from start trhough end after splitting
+     * False to disallow split parent
+     * @returns When cansplitParent is true, returns all node from start through end after splitting,
+     * otherwise just return start and end
+     */
+    public collapseNodes(nodes: Node[], canSplitParent: boolean): Node[];
+
+    /**
+     * Collapse nodes within the given start and end nodes to their common ascenstor node,
+     * split parent nodes if necessary
      * @param start The start node
      * @param end The end node
      * @param canSplitParent True to allow split parent node there are nodes before start or after end under the same parent
@@ -318,7 +332,24 @@ export default class Editor {
      * @returns When cansplitParent is true, returns all node from start through end after splitting,
      * otherwise just return start and end
      */
-    public collapseNodes(start: Node, end: Node, canSplitParent: boolean): Node[] {
+    public collapseNodes(start: Node, end: Node, canSplitParent: boolean): Node[];
+
+    public collapseNodes(
+        startOrNodes: Node | Node[],
+        endOrSplit: Node | boolean,
+        canSplitParent?: boolean
+    ): Node[] {
+        let start: Node;
+        let end: Node;
+
+        if (Array.isArray(startOrNodes)) {
+            start = startOrNodes[0];
+            end = startOrNodes[startOrNodes.length - 1];
+            canSplitParent = endOrSplit as boolean;
+        } else {
+            start = startOrNodes;
+            end = endOrSplit as Node;
+        }
         return collapseNodes(this.core.contentDiv, start, end, canSplitParent);
     }
 
@@ -431,7 +462,7 @@ export default class Editor {
             }
 
             let fragment = this.core.document.createDocumentFragment();
-            allNodes.forEach(node => fragment.appendChild(node));
+            allNodes.forEach((node) => fragment.appendChild(node));
 
             this.insertNode(fragment, option);
         }
@@ -663,7 +694,7 @@ export default class Editor {
         if (nameOrMap instanceof Object) {
             let handlers = Object.keys(nameOrMap)
                 .map(
-                    eventName =>
+                    (eventName) =>
                         nameOrMap[eventName] &&
                         this.core.api.attachDomEvent(
                             this.core,
@@ -672,8 +703,8 @@ export default class Editor {
                             nameOrMap[eventName]
                         )
                 )
-                .filter(x => x);
-            return () => handlers.forEach(handler => handler());
+                .filter((x) => x);
+            return () => handlers.forEach((handler) => handler());
         } else {
             return this.core.api.attachDomEvent(
                 this.core,
@@ -847,10 +878,10 @@ export default class Editor {
     /**
      * Get a content traverser for current selection
      */
-    public getSelectionTraverser(): ContentTraverser {
-        let range = this.getSelectionRange();
+    public getSelectionTraverser(range: Range = this.getSelectionRange()): ContentTraverser {
         return (
             range &&
+            this.contains(range) &&
             ContentTraverser.createSelectionTraverser(
                 this.core.contentDiv,
                 this.getSelectionRange()
