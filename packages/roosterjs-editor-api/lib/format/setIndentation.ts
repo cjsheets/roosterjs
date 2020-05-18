@@ -1,6 +1,7 @@
-import processList from '../utils/processList';
-import { ChangeSource, DocumentCommand, Indentation, QueryScope } from 'roosterjs-editor-types';
+import { ChangeSource, Indentation } from 'roosterjs-editor-types';
 import { Editor } from 'roosterjs-editor-core';
+import { getTagOfNode, splitBalancedNodeRange, toArray, unwrap, wrap } from 'roosterjs-editor-dom';
+import { runWithMultipleListSections } from '../utils/createVListFromSelection';
 
 /**
  * Set indentation at selection
@@ -11,28 +12,55 @@ import { Editor } from 'roosterjs-editor-core';
  * Indentation.Increase to increase indentation or Indentation.Decrease to decrease indentation
  */
 export default function setIndentation(editor: Editor, indentation: Indentation) {
-    let command: DocumentCommand.Indent | DocumentCommand.Outdent =
-        indentation == Indentation.Increase ? DocumentCommand.Indent : DocumentCommand.Outdent;
-    editor.addUndoSnapshot(() => {
-        editor.focus();
-        let listNode = editor.getElementAtCursor('OL,UL');
-        let newNode: Node;
+    editor.focus();
+    editor.addUndoSnapshot((start, end) => {
+        const regions = editor.getSelectedRegions();
 
-        if (listNode) {
-            // There is already list node, setIndentation() will increase/decrease the list level,
-            // so we need to process the list when change indentation
-            newNode = processList(editor, command);
-        } else {
-            // No existing list node, browser will create <Blockquote> node for indentation.
-            // We need to set top and bottom margin to 0 to avoid unnecessary spaces
-            editor.getDocument().execCommand(command, false, null);
-            editor.queryElements('BLOCKQUOTE', QueryScope.OnSelection, node => {
-                newNode = newNode || node;
-                node.style.marginTop = '0px';
-                node.style.marginBottom = '0px';
-            });
-        }
+        regions.forEach(region => {
+            runWithMultipleListSections(
+                editor,
+                region,
+                vList => {
+                    vList.setIndentation(start, end, indentation);
+                    vList.writeBack();
+                },
+                blockElements => {
+                    if (indentation == Indentation.Increase) {
+                        const startNode = blockElements[0].getStartNode();
+                        const endNode = blockElements[blockElements.length - 1].getEndNode();
+                        const nodes = editor.collapseNodes(
+                            startNode,
+                            endNode,
+                            true /*canSplitParent*/
+                        );
+                        const quote = wrap(nodes, 'blockquote');
+                        quote.style.marginTop = '0px';
+                        quote.style.marginBottom = '0px';
+                    } else {
+                        blockElements.forEach(blockElement => {
+                            let node = blockElement.collapseToSingleElement();
+                            const quote = editor.getElementAtCursor('blockquote', node);
+                            if (quote) {
+                                if (node == quote) {
+                                    node = wrap(toArray(node.childNodes));
+                                }
 
-        return newNode;
+                                while (
+                                    editor.contains(node) &&
+                                    getTagOfNode(node) != 'BLOCKQUOTE'
+                                ) {
+                                    node = splitBalancedNodeRange(node);
+                                }
+
+                                if (editor.contains(node)) {
+                                    unwrap(node);
+                                }
+                            }
+                        });
+                    }
+                }
+            );
+        });
+        editor.select(start, end);
     }, ChangeSource.Format);
 }

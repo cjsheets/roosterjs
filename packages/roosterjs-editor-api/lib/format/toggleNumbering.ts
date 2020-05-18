@@ -1,5 +1,5 @@
-import processList from '../utils/processList';
-import { ChangeSource, DocumentCommand } from 'roosterjs-editor-types';
+import createVListFromSelection from '../utils/createVListFromSelection';
+import { ChangeSource, ListType } from 'roosterjs-editor-types';
 import { Editor } from 'roosterjs-editor-core';
 
 /**
@@ -12,8 +12,16 @@ import { Editor } from 'roosterjs-editor-core';
  */
 export default function toggleNumbering(editor: Editor) {
     editor.focus();
-    editor.addUndoSnapshot(
-        () => processList(editor, DocumentCommand.InsertOrderedList),
-        ChangeSource.Format
-    );
+    editor.addUndoSnapshot((start, end) => {
+        const regions = editor.getSelectedRegions();
+
+        regions.forEach(region => {
+            const vList = createVListFromSelection(editor, region);
+            if (vList) {
+                vList.changeListType(start, end, ListType.Ordered);
+                vList.writeBack();
+                editor.select(start, end);
+            }
+        });
+    }, ChangeSource.Format);
 }

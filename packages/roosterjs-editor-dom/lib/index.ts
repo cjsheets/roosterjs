@@ -45,6 +45,8 @@ export { default as splitTextNode } from './utils/splitTextNode';
 export { default as toArray } from './utils/toArray';
 
 export { default as VTable, VCell } from './table/VTable';
+export { default as VList } from './list/VList';
+export { default as isListElement } from './list/isListElement';
 
 export { default as Position } from './selection/Position';
 export { default as createRange, getRangeFromSelectionPath } from './selection/createRange';
@@ -59,3 +61,5 @@ export { default as canMoveCurrentSnapshot } from './snapshots/canMoveCurrentSna
 export { default as clearProceedingSnapshots } from './snapshots/clearProceedingSnapshots';
 export { default as moveCurrentSnapsnot } from './snapshots/moveCurrentSnapsnot';
 export { default as createSnapshots } from './snapshots/createSnapshots';
+
+export { default as createRegionsFromRange } from './region/createRegionsFromRange';

@@ -15,6 +15,7 @@
     },
     "prettier.singleQuote": true,
     "editor.formatOnSave": true,
+    "prettier.arrowParens": "avoid",
     "prettier.tabWidth": 4,
     "prettier.trailingComma": "es5",
     "prettier.printWidth": 100,
