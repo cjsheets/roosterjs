@@ -60,7 +60,7 @@ export default function convertPastedContentFromWordOnline(doc: HTMLDocument) {
     sanitizeListItemContainer(doc);
     const listItemBlocks: ListItemBlock[] = getListItemBlocks(doc);
 
-    listItemBlocks.forEach((itemBlock) => {
+    listItemBlocks.forEach(itemBlock => {
         // There are cases where consecutive List Elements are seperated into different divs:
         // <div>
         //   <div>
@@ -94,7 +94,7 @@ export default function convertPastedContentFromWordOnline(doc: HTMLDocument) {
         itemBlock.insertPositionNode = itemBlock.endElement.nextSibling;
 
         let convertedListElement: Element;
-        itemBlock.listItemContainers.forEach((listItemContainer) => {
+        itemBlock.listItemContainers.forEach(listItemContainer => {
             let listType: 'OL' | 'UL' = getContainerListType(listItemContainer); // list type that is contained by iterator.
             // Initialize processed element with propery listType if this is the first element
             if (!convertedListElement) {
@@ -103,7 +103,7 @@ export default function convertPastedContentFromWordOnline(doc: HTMLDocument) {
 
             // Get all list items(<li>) in the current iterator element.
             const currentListItems = listItemContainer.querySelectorAll('li');
-            currentListItems.forEach((item) => {
+            currentListItems.forEach(item => {
                 // If item is in root level and the type of list changes then
                 // insert the current list into body and then reinitialize the convertedListElement
                 // Word Online is using data-aria-level to determine the the depth of the list item.
@@ -126,7 +126,7 @@ export default function convertPastedContentFromWordOnline(doc: HTMLDocument) {
         // we need to remove all the non processed node from the parent node.
         const parentContainer = itemBlock.startElement.parentNode;
         if (parentContainer) {
-            itemBlock.listItemContainers.forEach((listItemContainer) => {
+            itemBlock.listItemContainers.forEach(listItemContainer => {
                 parentContainer.removeChild(listItemContainer);
             });
         }
@@ -142,7 +142,7 @@ function sanitizeListItemContainer(doc: HTMLDocument) {
     const listItemContainerListEl = doc.querySelectorAll(
         `${WORD_ORDERED_LIST_SELECTOR}, ${WORD_UNORDERED_LIST_SELECTOR}`
     );
-    listItemContainerListEl.forEach((el) => {
+    listItemContainerListEl.forEach(el => {
         const replaceRegex = new RegExp(`\\b${LIST_CONTAINER_ELEMENT_CLASS_NAME}\\b`, 'g');
         if (el.previousSibling) {
             const prevParent = splitParentNode(el, true) as HTMLElement;
@@ -204,7 +204,8 @@ function flattenListBlock(rootElement: Element, listItemBlock: ListItemBlock) {
         listItemBlock.endElement,
         true
     );
-    collapsedListItemSections.forEach((section) => {
+  
+    collapsedListItemSections.forEach(section => {
         if (getTagOfNode(section.firstChild) == 'DIV') {
             unwrap(section);
         }
