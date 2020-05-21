@@ -24,6 +24,7 @@ import {
     PositionType,
     QueryScope,
     Rect,
+    Region,
     SelectionPath,
 } from 'roosterjs-editor-types';
 import {
@@ -31,6 +32,7 @@ import {
     contains,
     ContentTraverser,
     createRange,
+    getRegionsFromRange,
     findClosestElementAncestor,
     fromHtml,
     getBlockElementAtNode,
@@ -41,12 +43,12 @@ import {
     getPositionRect,
     getTagOfNode,
     isNodeEmpty,
+    isPositionAtBeginningOf,
     Position,
     PositionContentSearcher,
     queryElements,
     setHtmlWithSelectionPath,
     wrap,
-    isPositionAtBeginningOf,
 } from 'roosterjs-editor-dom';
 
 /**
@@ -629,6 +631,11 @@ export default class Editor {
         return isPositionAtBeginningOf(position, this.core.contentDiv);
     }
 
+    public getSelectedRegions(): Region[] {
+        const range = this.getSelectionRange();
+        return range ? getRegionsFromRange(this.core.contentDiv, range) : [];
+    }
+
     //#endregion
 
     //#region EVENT API
@@ -848,14 +855,8 @@ export default class Editor {
      * Get a content traverser for current selection
      */
     public getSelectionTraverser(): ContentTraverser {
-        let range = this.getSelectionRange();
-        return (
-            range &&
-            ContentTraverser.createSelectionTraverser(
-                this.core.contentDiv,
-                this.getSelectionRange()
-            )
-        );
+        const range = this.getSelectionRange();
+        return range && ContentTraverser.createSelectionTraverser(this.core.contentDiv, range);
     }
 
     /**

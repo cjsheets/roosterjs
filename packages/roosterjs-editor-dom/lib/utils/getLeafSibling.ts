@@ -1,4 +1,5 @@
 import contains from './contains';
+import getTagOfNode from './getTagOfNode';
 import shouldSkipNode from './shouldSkipNode';
 
 /**
@@ -7,7 +8,12 @@ import shouldSkipNode from './shouldSkipNode';
  * @param startNode current node to get sibling node from
  * @param isNext True to get next leaf sibling node, false to get previous leaf sibling node
  */
-export function getLeafSibling(rootNode: Node, startNode: Node, isNext: boolean): Node {
+export function getLeafSibling(
+    rootNode: Node,
+    startNode: Node,
+    isNext: boolean,
+    skipTags?: string[]
+): Node {
     let result = null;
     let getSibling = isNext
         ? (node: Node) => node.nextSibling
@@ -28,7 +34,11 @@ export function getLeafSibling(rootNode: Node, startNode: Node, isNext: boolean)
             }
 
             // Now traverse down to get first/last child
-            while (curNode && getChild(curNode)) {
+            while (
+                curNode &&
+                (!skipTags || skipTags.indexOf(getTagOfNode(curNode)) < 0) &&
+                getChild(curNode)
+            ) {
                 curNode = getChild(curNode);
             }
 

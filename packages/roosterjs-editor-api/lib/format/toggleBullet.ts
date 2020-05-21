@@ -1,5 +1,5 @@
-import processList from '../utils/processList';
-import { ChangeSource, DocumentCommand } from 'roosterjs-editor-types';
+import createMergedVList from '../utils/createMergedVList';
+import { ChangeSource, ListType } from 'roosterjs-editor-types';
 import { Editor } from 'roosterjs-editor-core';
 
 /**
@@ -12,8 +12,17 @@ import { Editor } from 'roosterjs-editor-core';
  */
 export default function toggleBullet(editor: Editor) {
     editor.focus();
-    editor.addUndoSnapshot(
-        () => processList(editor, DocumentCommand.InsertUnorderedList),
-        ChangeSource.Format
-    );
+    editor.addUndoSnapshot((start, end) => {
+        const regions = editor.getSelectedRegions();
+
+        regions.forEach(region => {
+            const vList = createMergedVList(editor, region);
+            if (vList) {
+                vList.changeListType(start, end, ListType.Unordered);
+                vList.writeBack();
+            }
+        });
+
+        editor.select(start, end);
+    }, ChangeSource.Format);
 }

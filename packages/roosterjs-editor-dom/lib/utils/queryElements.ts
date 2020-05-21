@@ -1,5 +1,6 @@
+import Position from '../selection/Position';
 import toArray from './toArray';
-import { DocumentPosition } from 'roosterjs-editor-types';
+import { DocumentPosition, NodePosition } from 'roosterjs-editor-types';
 import { QueryScope } from 'roosterjs-editor-types';
 
 /**
@@ -25,8 +26,10 @@ export default function queryElements(
     let elements = toArray(container.querySelectorAll<HTMLElement>(selector));
 
     if (scope != QueryScope.Body && range) {
+        const start = Position.getStart(range).normalize();
+        const end = Position.getEnd(range).normalize();
         elements = elements.filter(element =>
-            isIntersectWithNodeRange(element, range, scope == QueryScope.InSelection)
+            isIntersectWithNodeRange(element, start, end, scope == QueryScope.InSelection)
         );
     }
 
@@ -38,11 +41,12 @@ export default function queryElements(
 
 function isIntersectWithNodeRange(
     node: Node,
-    range: Range,
+    start: NodePosition,
+    end: NodePosition,
     nodeContainedByRangeOnly: boolean
 ): boolean {
-    let startPosition = node.compareDocumentPosition(range.startContainer);
-    let endPosition = node.compareDocumentPosition(range.endContainer);
+    let startPosition = node.compareDocumentPosition(start.node);
+    let endPosition = node.compareDocumentPosition(end.node);
     let targetPositions = [DocumentPosition.Same, DocumentPosition.Contains];
 
     if (!nodeContainedByRangeOnly) {

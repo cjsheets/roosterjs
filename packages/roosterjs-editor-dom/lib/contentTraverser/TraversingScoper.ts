@@ -34,4 +34,9 @@ export default interface TraversingScoper {
      * Trim the given inline element to match this scope
      */
     trimInlineElement: (inlineElement: InlineElement) => InlineElement;
+
+    /**
+     * Get an array of tags to skip when traverse
+     */
+    getSkipTags?: () => string[];
 }

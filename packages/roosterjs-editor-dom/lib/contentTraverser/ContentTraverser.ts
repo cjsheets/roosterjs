@@ -6,9 +6,15 @@ import PartialInlineElement from '../inlineElements/PartialInlineElement';
 import SelectionBlockScoper from './SelectionBlockScoper';
 import SelectionScoper from './SelectionScoper';
 import TraversingScoper from './TraversingScoper';
-import { BlockElement, ContentPosition, InlineElement, NodePosition } from 'roosterjs-editor-types';
 import { getInlineElementBeforeAfter } from '../inlineElements/getInlineElementBeforeAfter';
 import { getLeafSibling } from '../utils/getLeafSibling';
+import {
+    BlockElement,
+    ContentPosition,
+    IContentTraverser,
+    InlineElement,
+    NodePosition,
+} from 'roosterjs-editor-types';
 
 /**
  * The provides traversing of content inside editor.
@@ -16,7 +22,7 @@ import { getLeafSibling } from '../utils/getLeafSibling';
  * Block and inline traversing is independent from each other, meanning if you traverse block by block, it does not change
  * the current inline element position
  */
-export default class ContentTraverser {
+export default class ContentTraverser implements IContentTraverser {
     private currentInline: InlineElement;
     private currentBlock: BlockElement;
 
@@ -24,7 +30,7 @@ export default class ContentTraverser {
      * Create a content traverser for the whole body of given root node
      * @param scoper Traversing scoper object to help scope the traversing
      */
-    private constructor(private scoper: TraversingScoper) {}
+    constructor(private scoper: TraversingScoper) {}
 
     /**
      * Create a content traverser for the whole body of given root node
@@ -87,6 +93,7 @@ export default class ContentTraverser {
 
     private getPreviousNextBlockElement(isNext: boolean): BlockElement {
         let current = this.currentBlockElement;
+        const skipTags = this.scoper.getSkipTags?.();
 
         if (!current) {
             return null;
@@ -95,7 +102,8 @@ export default class ContentTraverser {
         let leaf = getLeafSibling(
             this.scoper.rootNode,
             isNext ? current.getEndNode() : current.getStartNode(),
-            isNext
+            isNext,
+            skipTags
         );
         let newBlock = leaf ? getBlockElementAtNode(this.scoper.rootNode, leaf) : null;
 

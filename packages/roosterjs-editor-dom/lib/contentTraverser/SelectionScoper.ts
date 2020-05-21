@@ -4,6 +4,7 @@ import Position from '../selection/Position';
 import TraversingScoper from './TraversingScoper';
 import { BlockElement, InlineElement, NodePosition } from 'roosterjs-editor-types';
 import { getInlineElementAfter } from '../inlineElements/getInlineElementBeforeAfter';
+import { isRange } from 'roosterjs-cross-window';
 
 /**
  * This is selection scoper that provide a start inline as the start of the selection
@@ -12,7 +13,7 @@ import { getInlineElementAfter } from '../inlineElements/getInlineElementBeforeA
  */
 export default class SelectionScoper implements TraversingScoper {
     private start: NodePosition;
-    private end: NodePosition;
+    protected readonly end: NodePosition;
     private startBlock: BlockElement;
     private startInline: InlineElement;
 
@@ -21,9 +22,24 @@ export default class SelectionScoper implements TraversingScoper {
      * @param rootNode The root node of the content
      * @param range The selection range to scope to
      */
-    constructor(public rootNode: Node, range: Range) {
-        this.start = Position.getStart(range).normalize();
-        this.end = Position.getEnd(range).normalize();
+    constructor(rootNode: Node, range: Range);
+
+    /**
+     * Create a new instance of SelectionScoper class
+     * @param rootNode The root node of the content
+     * @param start Start position of the selection
+     * @param end End position of the selection
+     */
+    constructor(rootNode: Node, start: NodePosition, end: NodePosition);
+
+    constructor(public rootNode: Node, rangeOrStart: Range | NodePosition, end?: NodePosition) {
+        if (isRange(rangeOrStart)) {
+            this.start = Position.getStart(rangeOrStart).normalize();
+            this.end = Position.getEnd(rangeOrStart).normalize();
+        } else {
+            this.start = rangeOrStart;
+            this.end = end;
+        }
     }
 
     /**
@@ -31,7 +47,7 @@ export default class SelectionScoper implements TraversingScoper {
      */
     public getStartBlockElement(): BlockElement {
         if (!this.startBlock) {
-            this.startBlock = getBlockElementAtNode(this.rootNode, this.start.node);
+            this.startBlock = getBlockElementAtNode(this.rootNode, this.start?.node);
         }
 
         return this.startBlock;
