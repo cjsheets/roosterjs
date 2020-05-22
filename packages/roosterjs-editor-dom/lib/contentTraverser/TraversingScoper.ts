@@ -13,7 +13,12 @@ export default interface TraversingScoper {
     /**
      * The root node of this scoper
      */
-    rootNode: Node;
+    readonly rootNode: Node;
+
+    /**
+     * An array of tags to skip when traverse
+     */
+    readonly skipTags?: string[];
 
     /**
      * Get the start block element

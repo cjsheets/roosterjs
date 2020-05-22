@@ -30,7 +30,7 @@ export default function splitParentNode(node: Node, splitBefore: boolean): Node 
     }
 
     // When the only child of new parent is ZERO_WIDTH_SPACE, we can still prevent keeping it by set removeEmptyNewNode to true
-    if (newParent.firstChild && newParent.innerHTML != '') {
+    if (newParent.firstChild && newParent.innerHTML.trim() != '') {
         parentNode.parentNode.insertBefore(
             newParent,
             splitBefore ? parentNode : parentNode.nextSibling
