@@ -7,7 +7,9 @@ import { BlockElement, PositionType } from 'roosterjs-editor-types';
 let testID = 'SelectionScoper';
 
 function createSelectionScoper(rootNode: Node, selectionRange: Range) {
-    return new SelectionScoper(rootNode, selectionRange);
+    const start = Position.getStart(selectionRange).normalize();
+    const end = Position.getEnd(selectionRange).normalize();
+    return new SelectionScoper(rootNode, start, end);
 }
 
 describe('SelectionScoper getStartBlockElement()', () => {

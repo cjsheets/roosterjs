@@ -45,6 +45,9 @@ export { default as splitTextNode } from './utils/splitTextNode';
 export { default as toArray } from './utils/toArray';
 
 export { default as VTable, VCell } from './table/VTable';
+export { default as VList } from './list/VList';
+export { default as createVListFromRegion } from './list/createVListFromRegion';
+export { default as getRegionsFromRange } from './region/getRegionsFromRange';
 
 export { default as Position } from './selection/Position';
 export { default as createRange, getRangeFromSelectionPath } from './selection/createRange';
