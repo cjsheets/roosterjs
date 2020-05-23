@@ -1,6 +1,7 @@
 import { BlockElement, InlineElement } from 'roosterjs-editor-types';
 
 /**
+ * @internal
  * A scoper provides two things to a content traverser:
  * 1) a start position -- a start inline or block element
  * 2) check if a block and inline element is in scope
@@ -14,6 +15,11 @@ export default interface TraversingScoper {
      * The root node of this scoper
      */
     rootNode: Node;
+
+    /**
+     * atomTags (Optional) tags to be treated as atom element and won't go inside
+     */
+    atomTags?: string[];
 
     /**
      * Get the start block element

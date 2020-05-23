@@ -24,6 +24,7 @@ import {
     PositionType,
     QueryScope,
     Rect,
+    Region,
     SelectionPath,
 } from 'roosterjs-editor-types';
 import {
@@ -31,6 +32,7 @@ import {
     contains,
     ContentTraverser,
     createRange,
+    getRegionsFromRange,
     findClosestElementAncestor,
     fromHtml,
     getBlockElementAtNode,
@@ -41,12 +43,12 @@ import {
     getPositionRect,
     getTagOfNode,
     isNodeEmpty,
+    isPositionAtBeginningOf,
     Position,
     PositionContentSearcher,
     queryElements,
     setHtmlWithSelectionPath,
     wrap,
-    isPositionAtBeginningOf,
 } from 'roosterjs-editor-dom';
 
 /**
@@ -56,6 +58,7 @@ export default class Editor {
     private core: EditorCore;
     private eventDisposers: (() => void)[];
     private contenteditableChanged: boolean;
+    private enableExperimentFeatures: boolean;
 
     //#region Lifecycle
 
@@ -72,6 +75,7 @@ export default class Editor {
 
         // 2. Store options values to local variables
         this.core = createEditorCore(contentDiv, options);
+        this.enableExperimentFeatures = options.enableExperimentFeatures;
 
         // 3. Initialize plugins
         this.core.plugins.forEach(plugin => plugin.initialize(this));
@@ -629,6 +633,14 @@ export default class Editor {
         return isPositionAtBeginningOf(position, this.core.contentDiv);
     }
 
+    /**
+     * Get impacted regions from selection
+     */
+    public getSelectedRegions(): Region[] {
+        const range = this.getSelectionRange();
+        return range ? getRegionsFromRange(this.core.contentDiv, range) : [];
+    }
+
     //#endregion
 
     //#region EVENT API
@@ -966,6 +978,13 @@ export default class Editor {
      */
     public getDarkModeOptions(): DarkModeOptions {
         return this.core.darkModeOptions;
+    }
+
+    /**
+     * Whether experiment features can be used
+     */
+    public useExperimentFeatures(): boolean {
+        return !!this.enableExperimentFeatures;
     }
 
     //#endregion

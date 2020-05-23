@@ -1,30 +1,32 @@
 import getBlockElementAtNode from '../blockElements/getBlockElementAtNode';
 import PartialInlineElement from '../inlineElements/PartialInlineElement';
-import Position from '../selection/Position';
 import TraversingScoper from './TraversingScoper';
 import { BlockElement, InlineElement, NodePosition } from 'roosterjs-editor-types';
 import { getInlineElementAfter } from '../inlineElements/getInlineElementBeforeAfter';
 
 /**
+ * @internal
  * This is selection scoper that provide a start inline as the start of the selection
  * and checks if a block falls in the selection (isBlockInScope)
  * last trimInlineElement to trim any inline element to return a partial that falls in the selection
  */
 export default class SelectionScoper implements TraversingScoper {
-    private start: NodePosition;
-    private end: NodePosition;
     private startBlock: BlockElement;
     private startInline: InlineElement;
 
     /**
      * Create a new instance of SelectionScoper class
      * @param rootNode The root node of the content
-     * @param range The selection range to scope to
+     * @param start Start position of the selection
+     * @param end End position of the selection
+     * @param atomTags (Optional) tags to be treated as atom element and won't go inside
      */
-    constructor(public rootNode: Node, range: Range) {
-        this.start = Position.getStart(range).normalize();
-        this.end = Position.getEnd(range).normalize();
-    }
+    constructor(
+        public rootNode: Node,
+        private start: NodePosition,
+        private end: NodePosition,
+        public atomTags?: string[]
+    ) {}
 
     /**
      * Provide a start block as the first block after the cursor

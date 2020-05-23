@@ -3,12 +3,14 @@ import EmptyInlineElement from '../inlineElements/EmptyInlineElement';
 import getBlockElementAtNode from '../blockElements/getBlockElementAtNode';
 import getInlineElementAtNode from '../inlineElements/getInlineElementAtNode';
 import PartialInlineElement from '../inlineElements/PartialInlineElement';
+import Position from '../selection/Position';
 import SelectionBlockScoper from './SelectionBlockScoper';
 import SelectionScoper from './SelectionScoper';
 import TraversingScoper from './TraversingScoper';
 import { BlockElement, ContentPosition, InlineElement, NodePosition } from 'roosterjs-editor-types';
 import { getInlineElementBeforeAfter } from '../inlineElements/getInlineElementBeforeAfter';
 import { getLeafSibling } from '../utils/getLeafSibling';
+import { isRange } from 'roosterjs-cross-window';
 
 /**
  * The provides traversing of content inside editor.
@@ -40,8 +42,36 @@ export default class ContentTraverser {
      * @param rootNode The root node to traverse in
      * @param range The selection range to scope the traversing
      */
-    public static createSelectionTraverser(rootNode: Node, range: Range): ContentTraverser {
-        return new ContentTraverser(new SelectionScoper(rootNode, range));
+    public static createSelectionTraverser(rootNode: Node, range: Range): ContentTraverser;
+
+    /**
+     * Create a content traverser for the given start and end position
+     * @param rootNode The root node to traverse in
+     * @param start start position of the selection
+     * @param end end position of the selection
+     * @param atomTags (Optional) tags to be treated as atom element and won't go inside
+     */
+    public static createSelectionTraverser(
+        rootNode: Node,
+        start: NodePosition,
+        end: NodePosition,
+        atomTags?: string[]
+    ): ContentTraverser;
+
+    public static createSelectionTraverser(
+        rootNode: Node,
+        rangeOrStart: Range | NodePosition,
+        end?: NodePosition,
+        atomTags?: string[]
+    ) {
+        const scoper = isRange(rangeOrStart)
+            ? new SelectionScoper(
+                  rootNode,
+                  Position.getStart(rangeOrStart).normalize(),
+                  Position.getEnd(rangeOrStart).normalize()
+              )
+            : new SelectionScoper(rootNode, rangeOrStart, end, atomTags);
+        return new ContentTraverser(scoper);
     }
 
     /**
@@ -95,7 +125,8 @@ export default class ContentTraverser {
         let leaf = getLeafSibling(
             this.scoper.rootNode,
             isNext ? current.getEndNode() : current.getStartNode(),
-            isNext
+            isNext,
+            this.scoper.atomTags
         );
         let newBlock = leaf ? getBlockElementAtNode(this.scoper.rootNode, leaf) : null;
 

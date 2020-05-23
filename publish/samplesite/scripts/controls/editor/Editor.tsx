@@ -116,6 +116,7 @@ export default class Editor extends React.Component<EditorProps, BuildInPluginSt
             defaultFormat: defaultFormat,
             undo: this.props.undo,
             initialContent: this.props.content,
+            enableExperimentFeatures: true,
         };
         this.editor = new RoosterJsEditor(this.contentDiv, options);
     }
