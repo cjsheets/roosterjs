@@ -128,9 +128,9 @@ export default class HtmlSanitizer {
         let styleNodes = toArray(rootNode.querySelectorAll('style'));
         let styleSheets = this.additionalGlobalStyleNodes
             .reverse()
-            .map((node) => node.sheet as CSSStyleSheet)
-            .concat(styleNodes.map((node) => node.sheet as CSSStyleSheet).reverse())
-            .filter((sheet) => sheet);
+            .map(node => node.sheet as CSSStyleSheet)
+            .concat(styleNodes.map(node => node.sheet as CSSStyleSheet).reverse())
+            .filter(sheet => sheet);
         for (let styleSheet of styleSheets) {
             for (let j = styleSheet.cssRules.length - 1; j >= 0; j--) {
                 // Skip any none-style rule, i.e. @page
@@ -148,14 +148,14 @@ export default class HtmlSanitizer {
                     // Always put existing styles after so that they have higher priority
                     // Which means if both global style and inline style apply to the same element,
                     // inline style will have higher priority
-                    nodes.forEach((node) =>
+                    nodes.forEach(node =>
                         node.setAttribute('style', text + (node.getAttribute('style') || ''))
                     );
                 }
             }
         }
 
-        styleNodes.forEach((node) => {
+        styleNodes.forEach(node => {
             if (node.parentNode) {
                 node.parentNode.removeChild(node);
             }
@@ -212,7 +212,7 @@ export default class HtmlSanitizer {
         }
 
         let source = styleNode.value.split(';');
-        let result = source.filter((style) => {
+        let result = source.filter(style => {
             let pair: string[];
 
             if (!style || style.trim() == '' || (pair = style.split(':')).length != 2) {
@@ -239,7 +239,7 @@ export default class HtmlSanitizer {
 
         if (source.length != result.length) {
             if (result.length > 0) {
-                element.setAttribute('style', result.map((s) => s.trim()).join('; '));
+                element.setAttribute('style', result.map(s => s.trim()).join('; '));
             } else {
                 element.removeAttribute('style');
             }
