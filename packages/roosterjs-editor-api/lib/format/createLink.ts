@@ -96,6 +96,11 @@ export default function createLink(
                 anchor.removeAttribute(TEMP_TITLE);
                 anchor.title = altText;
             }
+
+            if (anchor) {
+                anchor.target = '_blank';
+            }
+
             return anchor;
         }, ChangeSource.CreateLink);
     }
