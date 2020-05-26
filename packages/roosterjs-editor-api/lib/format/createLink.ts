@@ -118,5 +118,5 @@ function checkXss(link: string): string {
 
     a.href = link || '';
     santizer.sanitize(doc.body);
-    return a.href;
+    return a.getAttribute('href');
 }
